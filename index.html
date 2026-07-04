@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculate China to India landing costs including product prices, conversion rates, shipping costs per CBM, domestic courier costs, and markup margins. Includes sizing converters (mm, cm, inch, feet) and a CBM helper.">
+    <title>China-India Import Landing Cost Calculator & Sizing Converter</title>
+    <!-- Google Fonts: Plus Jakarta Sans for premium modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for high-quality icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <!-- Background abstract glow shapes for modern design aesthetics -->
+    <div class="glow-bg">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <header class="app-header">
+        <div class="header-container">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-calculator-combined"></i>
+                </div>
+                <div>
+                    <h1>DragonGate</h1>
+                    <p class="subtitle">China to India Import Cost Calculator & Sizing Helper</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="themeToggle" class="theme-btn" aria-label="Toggle light/dark theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- LEFT COLUMN: Landing Cost Calculator -->
+        <section class="calc-section card glass" aria-labelledby="calculator-heading">
+            <div class="card-header">
+                <h2 id="calculator-heading"><i class="fa-solid fa-ship icon-glow"></i> Landing Cost Calculator</h2>
+                <button id="resetCalcBtn" class="action-link-btn" title="Reset all cost calculator values"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
+            </div>
+            
+            <form id="calculatorForm" class="form-grid">
+                <!-- Section 1: Cost & Conversion -->
+                <div class="form-group-wrapper">
+                    <h3><span class="step-num">1</span> Product & Conversion</h3>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="priceYuan">Price in Yuan (¥)</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">¥</span>
+                                <input type="number" id="priceYuan" min="0" step="any" placeholder="100.00" required value="100">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="conversionRate">Rate (INR / ¥)</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">₹</span>
+                                <input type="number" id="conversionRate" min="0.01" step="0.01" placeholder="14.50" value="14.5" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="lalamoveYuan">Local China / Lalamove (¥)</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">¥</span>
+                                <input type="number" id="lalamoveYuan" min="0" step="any" placeholder="0.00" value="0">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="gstPercent">GST / Import Tax (%)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="gstPercent" min="0" max="100" step="any" placeholder="5" value="5">
+                                <span class="input-suffix">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Freight & CBM -->
+                <div class="form-group-wrapper">
+                    <h3><span class="step-num">2</span> International Freight</h3>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="cbmValue">CBM (Cubic Meters)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="cbmValue" min="0" step="0.0001" placeholder="0.1000" value="0.1" required>
+                                <span class="input-suffix">m³</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <div class="label-with-toggle">
+                                <label for="ratePerCbm">Rate per CBM</label>
+                                <div class="toggle-pill" id="cbmCurrencyToggle">
+                                    <span class="toggle-option active" data-val="CNY">¥</span>
+                                    <span class="toggle-option" data-val="INR">₹</span>
+                                </div>
+                            </div>
+                            <div class="input-wrapper">
+                                <span class="input-prefix" id="cbmRatePrefix">¥</span>
+                                <input type="number" id="ratePerCbm" min="0" step="any" placeholder="1200" value="1200" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Domestic Delivery (Optional) -->
+                <div class="form-group-wrapper">
+                    <h3><span class="step-num">3</span> Domestic Courier (Optional)</h3>
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="weightKg">Weight of Item (Optional)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="weightKg" min="0" step="any" placeholder="0.00">
+                                <span class="input-suffix">kg</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="shippingPerKg">Domestic Cost per kg</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">₹</span>
+                                <input type="number" id="shippingPerKg" min="0" step="any" placeholder="50.00" value="50">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Margin / Profit -->
+                <div class="form-group-wrapper">
+                    <h3><span class="step-num">4</span> Margin / Markup</h3>
+                    <div class="input-row">
+                        <div class="input-group full-width">
+                            <div class="label-with-toggle">
+                                <label for="marginVal">Margin Value</label>
+                                <div class="toggle-pill" id="marginTypeToggle">
+                                    <span class="toggle-option active" data-val="percent">% (Markup)</span>
+                                    <span class="toggle-option" data-val="fixed">₹ (Fixed)</span>
+                                </div>
+                            </div>
+                            <div class="input-wrapper">
+                                <input type="number" id="marginVal" min="0" step="any" placeholder="30" value="30">
+                                <span class="input-suffix" id="marginSuffix">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Real-time Cost Landing Summary Card -->
+            <div class="results-container">
+                <div class="results-header">
+                    <h3>Landing Cost Summary</h3>
+                </div>
+                
+                <div class="results-grid">
+                    <div class="result-card">
+                        <span class="result-label">Product Cost</span>
+                        <span class="result-value" id="resProductCost">₹0.00</span>
+                        <span class="result-sub" id="resProductCostYuan">¥0.00</span>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Local China Cost</span>
+                        <span class="result-value" id="resLalamoveCost">₹0.00</span>
+                        <span class="result-sub" id="resLalamoveCostSub">¥0.00</span>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">GST / Import Tax</span>
+                        <span class="result-value" id="resGstCost">₹0.00</span>
+                        <span class="result-sub" id="resGstCostSub">5.00% of Product</span>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Int'l Freight</span>
+                        <span class="result-value" id="resFreightCost">₹0.00</span>
+                        <span class="result-sub" id="resFreightCostSub">0.00 CBM</span>
+                    </div>
+                    <div class="result-card">
+                        <span class="result-label">Domestic Delivery</span>
+                        <span class="result-value" id="resDomesticCost">₹0.00</span>
+                        <span class="result-sub" id="resDomesticCostSub">0.00 kg</span>
+                    </div>
+                    <div class="result-card highlight">
+                        <span class="result-label">Base Landing Cost</span>
+                        <span class="result-value" id="resLandingCost">₹0.00</span>
+                        <span class="result-sub">Excluding Margin</span>
+                    </div>
+                </div>
+
+                <div class="results-margin-details">
+                    <div class="margin-line">
+                        <span>Your Margin / Profit:</span>
+                        <strong id="resMarginAmt">₹0.00</strong>
+                    </div>
+                    <hr class="divider">
+                    <div class="grand-total-line">
+                        <span>Landing Cost + Margin:</span>
+                        <div class="total-badge animate-pulse">
+                            <span class="grand-total-val" id="resGrandTotal">₹0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Helpers (Sizing Converter) -->
+        <div class="sidebar-helpers">
+
+            <!-- Sizing Converter -->
+            <section class="helper-card card glass" id="sizingConverterSection" aria-labelledby="sizing-heading">
+                <div class="card-header">
+                    <h2 id="sizing-heading"><i class="fa-solid fa-ruler-combined icon-glow"></i> Sizing Converter</h2>
+                    <button id="resetSizingBtn" class="action-link-btn" title="Reset sizing converter"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
+                </div>
+                <p class="section-desc">Type in any input field to convert immediately across all standard length units.</p>
+                
+                <div class="sizing-grid">
+                    <div class="input-group">
+                        <label for="sizeMm">Millimeters (mm)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sizeMm" placeholder="0" step="any">
+                            <span class="input-tag">mm</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="sizeCm">Centimeters (cm)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sizeCm" placeholder="0" step="any">
+                            <span class="input-tag">cm</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="sizeM">Meters (m)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sizeM" placeholder="0" step="any">
+                            <span class="input-tag">m</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="sizeInch">Inches (in)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sizeInch" placeholder="0" step="any">
+                            <span class="input-tag">in</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="sizeFoot">Feet (ft)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="sizeFoot" placeholder="0" step="any">
+                            <span class="input-tag">ft</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <p>&copy; 2026 Import Gateways. Crafted with <i class="fa-solid fa-heart accent-glow"></i> for global trade.</p>
+        <p class="footer-links">
+            <span class="footer-badge">Premium UI</span>
+            <span class="footer-badge">Offline Capable</span>
+            <span class="footer-badge">Auto Save</span>
+        </p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
