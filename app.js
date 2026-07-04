@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const marginValInput = document.getElementById('marginVal');
 
     // Toggles
-    const cbmCurrencyToggle = document.getElementById('cbmCurrencyToggle');
-    const cbmRatePrefix = document.getElementById('cbmRatePrefix');
     const marginTypeToggle = document.getElementById('marginTypeToggle');
     const marginSuffix = document.getElementById('marginSuffix');
     const themeToggle = document.getElementById('themeToggle');
@@ -47,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetSizingBtn = document.getElementById('resetSizingBtn');
 
     // --- State Variables ---
-    let cbmFreightCurrency = 'CNY'; // 'CNY' or 'INR'
     let marginType = 'percent'; // 'percent' or 'fixed'
 
     // --- Local Storage Initialization ---
@@ -69,22 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('gstPercent')) {
             gstPercentInput.value = localStorage.getItem('gstPercent');
         }
+        
+        // Smart migration: if stored CBM rate is less than 2000, it was likely Yuan. Convert to INR default.
         if (localStorage.getItem('ratePerCbm')) {
-            ratePerCbmInput.value = localStorage.getItem('ratePerCbm');
+            const storedRate = parseFloat(localStorage.getItem('ratePerCbm')) || 0;
+            if (storedRate < 2000) {
+                ratePerCbmInput.value = 12000;
+            } else {
+                ratePerCbmInput.value = storedRate;
+            }
         }
+        
         if (localStorage.getItem('shippingPerKg')) {
             shippingPerKgInput.value = localStorage.getItem('shippingPerKg');
-        }
-        if (localStorage.getItem('cbmFreightCurrency')) {
-            cbmFreightCurrency = localStorage.getItem('cbmFreightCurrency');
-            cbmCurrencyToggle.querySelectorAll('.toggle-option').forEach(el => {
-                if (el.getAttribute('data-val') === cbmFreightCurrency) {
-                    el.classList.add('active');
-                } else {
-                    el.classList.remove('active');
-                }
-            });
-            cbmRatePrefix.textContent = cbmFreightCurrency === 'CNY' ? '¥' : '₹';
         }
         if (localStorage.getItem('marginType')) {
             marginType = localStorage.getItem('marginType');
@@ -106,7 +100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('gstPercent', gstPercentInput.value);
         localStorage.setItem('ratePerCbm', ratePerCbmInput.value);
         localStorage.setItem('shippingPerKg', shippingPerKgInput.value);
-        localStorage.setItem('cbmFreightCurrency', cbmFreightCurrency);
         localStorage.setItem('marginType', marginType);
     }
 
@@ -151,13 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // 3. GST Import Tax (5% default of product cost in India)
         const gstCostINR = productCostINR * (gstPercent / 100);
 
-        // 4. Freight Cost
-        let freightCostINR = 0;
-        if (cbmFreightCurrency === 'CNY') {
-            freightCostINR = cbmValue * ratePerCbm * conversionRate;
-        } else {
-            freightCostINR = cbmValue * ratePerCbm;
-        }
+        // 4. Freight Cost (Always computed directly in INR)
+        const freightCostINR = cbmValue * ratePerCbm;
 
         // 5. Domestic Delivery Cost
         const domesticCostINR = weightKg > 0 ? (weightKg * shippingPerKg) : 0;
@@ -187,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resGstCostSub.textContent = `${gstPercent.toFixed(2)}% of Product`;
 
         resFreightCost.textContent = formatINR(freightCostINR);
-        resFreightCostSub.textContent = `${cbmValue.toFixed(4)} CBM @ ${cbmFreightCurrency === 'CNY' ? '¥' : '₹'}${ratePerCbm}`;
+        resFreightCostSub.textContent = `${cbmValue.toFixed(4)} CBM @ ₹${ratePerCbm}`;
 
         resDomesticCost.textContent = formatINR(domesticCostINR);
         resDomesticCostSub.textContent = weightKg > 0 ? `${weightKg.toFixed(2)} kg @ ₹${shippingPerKg}/kg` : 'No weight entered';
@@ -245,20 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('input', calculateCosts);
     });
 
-    // CBM Currency Toggle Click
-    cbmCurrencyToggle.addEventListener('click', (e) => {
-        const option = e.target.closest('.toggle-option');
-        if (!option) return;
-
-        cbmCurrencyToggle.querySelectorAll('.toggle-option').forEach(el => el.classList.remove('active'));
-        option.classList.add('active');
-
-        cbmFreightCurrency = option.getAttribute('data-val');
-        cbmRatePrefix.textContent = cbmFreightCurrency === 'CNY' ? '¥' : '₹';
-        
-        calculateCosts();
-    });
-
     // Margin Type Toggle Click
     marginTypeToggle.addEventListener('click', (e) => {
         const option = e.target.closest('.toggle-option');
@@ -302,18 +276,10 @@ document.addEventListener('DOMContentLoaded', () => {
         lalamoveYuanInput.value = 0;
         gstPercentInput.value = 5;
         cbmValueInput.value = 0.1;
-        ratePerCbmInput.value = 1200;
+        ratePerCbmInput.value = 12000;
         weightKgInput.value = '';
         shippingPerKgInput.value = 50;
         marginValInput.value = 30;
-        
-        // Reset currencies
-        cbmFreightCurrency = 'CNY';
-        cbmCurrencyToggle.querySelectorAll('.toggle-option').forEach(el => {
-            if (el.getAttribute('data-val') === 'CNY') el.classList.add('active');
-            else el.classList.remove('active');
-        });
-        cbmRatePrefix.textContent = '¥';
 
         marginType = 'percent';
         marginTypeToggle.querySelectorAll('.toggle-option').forEach(el => {
