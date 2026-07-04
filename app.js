@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         priceYuanInput.value = 100;
         conversionRateInput.value = 14.5;
-        lalamoveYuanInput.value = 0;
+        lalamoveYuanInput.value = 30;
         gstPercentInput.value = 5;
         cbmValueInput.value = 0.1;
         ratePerCbmInput.value = 12000;
