@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resLandingCost = document.getElementById('resLandingCost');
     const resMarginAmt = document.getElementById('resMarginAmt');
     const resGrandTotal = document.getElementById('resGrandTotal');
+    const resMultiplier = document.getElementById('resMultiplier');
 
     // Reset Buttons
     const resetCalcBtn = document.getElementById('resetCalcBtn');
@@ -183,6 +184,9 @@ document.addEventListener('DOMContentLoaded', () => {
         resLandingCost.textContent = formatINR(landingCostINR);
         resMarginAmt.textContent = formatINR(marginAmountINR);
         resGrandTotal.textContent = formatINR(grandTotalINR);
+
+        const multiplier = priceYuan > 0 ? (grandTotalINR / priceYuan) : 0;
+        resMultiplier.textContent = `${multiplier.toFixed(2)}x`;
 
         // Auto Save to localStorage
         saveSettings();
